@@ -1,0 +1,6 @@
+long _variable1 = 11;
+double *suma = *variable1 + 20;
+// Esto es un comentario de una línea
+if (_suma > 30) then {
+    write(_suma);
+}
