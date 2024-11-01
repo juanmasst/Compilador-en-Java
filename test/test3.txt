@@ -1,4 +1,4 @@
-long _variable1 = 11;
+long _variable1 = 10;
 double *suma = *variable1 + 20;
 // Esto es un comentario de una línea
 if (_suma > 30) then {

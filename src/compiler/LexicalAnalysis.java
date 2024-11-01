@@ -1,4 +1,5 @@
 // LexicalAnalysis.java
+package compiler;
 
 import java.util.ArrayList;
 
