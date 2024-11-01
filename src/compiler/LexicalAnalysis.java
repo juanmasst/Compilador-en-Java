@@ -69,40 +69,58 @@ public class LexicalAnalysis {
                 }
             }
 
-            // Manejo de operadores compuestos
-            if (isOperatorChar(currentChar)) {
-                if (currentToken.length() > 0) {
-                    addToken(tokens, currentToken.toString());
-                    currentToken.setLength(0);
-                }
-
-                String operator = String.valueOf(currentChar);
-                if (i + 1 < text.length() && isOperatorChar(text.charAt(i + 1))) {
-                    operator += text.charAt(i + 1);
-                    i++;
-                }
-                tokens.add(operator);
-                i++;
-                continue;
-            }
-
-            // Manejo de separadores
-            if (isSeparator(currentChar)) {
-                if (currentToken.length() > 0) {
-                    addToken(tokens, currentToken.toString());
-                    currentToken.setLength(0);
-                }
-                tokens.add(String.valueOf(currentChar));
-                i++;
-                continue;
-            }
-
-            // Construcción de identificadores y números
-            if (Character.isLetterOrDigit(currentChar) || currentChar == '_') {
+            // Manejo de números (incluyendo decimales)
+            if (Character.isDigit(currentChar)) {
                 currentToken.append(currentChar);
                 i++;
+                continue;
+            }
+            
+            // Detectar y rechazar comas en números
+            if (currentChar == ',' && currentToken.length() > 0 && Character.isDigit(currentToken.charAt(currentToken.length() - 1))) {
+                errors.clear();
+                errors.add("Error: Use punto (.) en lugar de coma (,) en línea " + currentLine);
+                return errors;
+            }
+
+            // Manejo del punto decimal
+            if (currentChar == '.' && currentToken.length() > 0 && Character.isDigit(currentToken.charAt(currentToken.length() - 1))) {
+                currentToken.append(currentChar);
+                i++;
+                continue;
+            }
+
+            // Construcción de identificadores
+            if (Character.isLetter(currentChar) || currentChar == '_') {
+                currentToken.append(currentChar);
+                i++;
+            } else if (!Character.isDigit(currentChar)) {  // Si no es dígito ni letra ni _
+                if (currentToken.length() > 0) {
+                    addToken(tokens, currentToken.toString());
+                    currentToken.setLength(0);
+                }
+                
+                // Si es un operador o separador, procesarlo
+                if (isOperatorChar(currentChar) || isSeparator(currentChar)) {
+                    if (currentToken.length() > 0) {
+                        addToken(tokens, currentToken.toString());
+                        currentToken.setLength(0);
+                    }
+                    
+                    String operator = String.valueOf(currentChar);
+                    if (i + 1 < text.length() && isOperatorChar(text.charAt(i + 1))) {
+                        operator += text.charAt(i + 1);
+                        i++;
+                    }
+                    tokens.add(operator);
+                    i++;
+                } else {
+                    errors.clear();
+                    errors.add("Error: Carácter inválido '" + currentChar + "' en línea " + currentLine);
+                    return errors;
+                }
             } else {
-                errors.add("Error léxico: carácter inválido '" + currentChar + "' en línea " + currentLine);
+                currentToken.append(currentChar);
                 i++;
             }
         }
@@ -112,7 +130,15 @@ public class LexicalAnalysis {
             addToken(tokens, currentToken.toString());
         }
 
-        return errors.isEmpty() ? tokens : errors;
+        // Retornar errores si existen, o tokens con "success" si no hay errores
+        if (!errors.isEmpty()) {
+            return errors;
+        } else {
+            ArrayList<String> successTokens = new ArrayList<>();
+            successTokens.add("\nsuccess");
+            successTokens.addAll(tokens);
+            return successTokens;
+        }
     }
 
     private void addToken(ArrayList<String> tokens, String token) {

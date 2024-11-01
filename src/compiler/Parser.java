@@ -51,19 +51,22 @@ public class Parser {
     }
 
     private void parseDeclaration() {
-        String var1 = this.currentToken;
+        String dataType = this.currentToken;
         this.advance();
         if (!this.isIdentifier(this.currentToken)) {
             this.addError("Se esperaba un identificador que comience con '_'");
         } else {
-            String var2 = this.currentToken;
-            if (this.isDeclaredVariable(var2)) {
-                this.addError("Variable ya declarada: " + var2);
+            String identifier = this.currentToken;
+            if (this.isDeclaredVariable(identifier)) {
+                this.addError("Variable ya declarada: " + identifier);
             } else {
-                this.declaredVariables.add(var2);
+                this.declaredVariables.add(identifier);
                 this.advance();
                 if (this.currentToken.equals("=")) {
                     this.advance();
+                    if (dataType.equals("long") && this.currentToken.contains(".")) {
+                        this.addError("No se puede asignar un decimal a una variable long");
+                    }
                     this.parseExpression();
                 }
 
@@ -227,7 +230,11 @@ public class Parser {
 
     private boolean isNumber(String var1) {
         try {
-            Double.parseDouble(var1);
+            if (currentToken.contains(".")) {
+                Double.parseDouble(var1);
+            } else {
+                Long.parseLong(var1);
+            }
             return true;
         } catch (NumberFormatException var3) {
             return false;

@@ -56,14 +56,24 @@ public class Compiler {
             LexicalAnalysis lexer = new LexicalAnalysis(fileContent);
             ArrayList<String> tokens = lexer.scan();
 
-            // Mostrar tokens
+            // Si hay errores léxicos, mostrarlos y terminar
+            if (!tokens.isEmpty() && tokens.get(0).startsWith("Error:")) {
+                System.out.println("\nErrores léxicos encontrados:");
+                System.out.println("----------------------------------------");
+                System.out.println(tokens.get(0));
+                System.out.println("No se realizará el análisis sintáctico hasta que se corrijan los errores léxicos.");
+                return;
+            }
+
+            // Mostrar tokens y luego success
             System.out.println("\nLexical Analysis Results:");
             System.out.println("----------------------------------------");
-            for (int i = 0; i < tokens.size(); i++) {
-                if (!tokens.get(i).trim().isEmpty()) {  // Solo mostrar tokens no vacíos
-                    System.out.printf("Token %3d: %s\n", i, tokens.get(i));
+            for (int i = 1; i < tokens.size(); i++) {  // Comienza desde 1 para saltar "success"
+                if (!tokens.get(i).trim().isEmpty()) {
+                    System.out.printf("Token %3d: %s\n", i-1, tokens.get(i));
                 }
             }
+            System.out.println(tokens.get(0));  // Muestra "success" al final
 
             // Análisis sintáctico
             System.out.println("\nParsing Results:");

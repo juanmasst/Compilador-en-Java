@@ -3,8 +3,8 @@
    de comentarios */
 
 // Declaración de variables con diferentes tipos DOUBLE TIENE QUE ADMITIR PUNTO FLOTANTE
-long _contador = 10;
-double _precio = 9999;
+long _contador = 10.10;
+double _precio = 99.99;
 
 // Prueba de operadores aritméticos
 long _suma = _contador + 5;
