@@ -52,15 +52,17 @@ public class Compiler {
             System.out.println(fileContent);
             System.out.println("----------------------------------------");
 
-            // Obtener tokens
-            Readfiles fileReader = new Readfiles();
-            ArrayList<String> tokens = fileReader.readfile(file);
+            // Análisis léxico directo
+            LexicalAnalysis lexer = new LexicalAnalysis(fileContent);
+            ArrayList<String> tokens = lexer.scan();
 
-            // Análisis léxico
+            // Mostrar tokens
             System.out.println("\nLexical Analysis Results:");
             System.out.println("----------------------------------------");
             for (int i = 0; i < tokens.size(); i++) {
-                System.out.printf("Token %3d: %s\n", i, tokens.get(i));
+                if (!tokens.get(i).trim().isEmpty()) {  // Solo mostrar tokens no vacíos
+                    System.out.printf("Token %3d: %s\n", i, tokens.get(i));
+                }
             }
 
             // Análisis sintáctico

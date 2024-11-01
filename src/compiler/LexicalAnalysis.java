@@ -21,20 +21,11 @@ public class LexicalAnalysis {
         while (i < text.length()) {
             char currentChar = text.charAt(i);
 
-            // Manejo de saltos de línea
-            if (currentChar == '\n') {
-                currentLine++;
-                i++;
-                if (currentToken.length() > 0) {
-                    addToken(tokens, currentToken.toString());
-                    currentToken.setLength(0);
-                }
-                tokens.add("\n");
-                continue;
-            }
-
-            // Ignorar espacios en blanco
+            // Ignorar todos los caracteres de espacio en blanco (incluyendo saltos de línea)
             if (Character.isWhitespace(currentChar)) {
+                if (currentChar == '\n') {
+                    currentLine++;
+                }
                 if (currentToken.length() > 0) {
                     addToken(tokens, currentToken.toString());
                     currentToken.setLength(0);
@@ -45,12 +36,36 @@ public class LexicalAnalysis {
 
             // Manejo de comentarios
             if (currentChar == '/') {
-                if (i + 1 < text.length() && text.charAt(i + 1) == '/') {
-                    // Comentario de línea
-                    while (i < text.length() && text.charAt(i) != '\n') {
-                        i++;
+                if (i + 1 < text.length()) {
+                    if (text.charAt(i + 1) == '/') {
+                        // Comentario de línea simple
+                        while (i < text.length() && text.charAt(i) != '\n') {
+                            i++;
+                        }
+                        continue;
+                    } else if (text.charAt(i + 1) == '*') {
+                        // Comentario multilínea
+                        tokens.add("/*");
+                        i += 2;
+                        while (i < text.length() - 1 && !(text.charAt(i) == '*' && text.charAt(i + 1) == '/')) {
+                            if (text.charAt(i) == '\n') {
+                                currentLine++;
+                            } else if (!Character.isWhitespace(text.charAt(i))) {
+                                currentToken.append(text.charAt(i));
+                            } else if (currentToken.length() > 0) {
+                                tokens.add(currentToken.toString());
+                                currentToken.setLength(0);
+                            }
+                            i++;
+                        }
+                        if (currentToken.length() > 0) {
+                            tokens.add(currentToken.toString());
+                            currentToken.setLength(0);
+                        }
+                        tokens.add("*/");
+                        i += 2;
+                        continue;
                     }
-                    continue;
                 }
             }
 
@@ -83,7 +98,7 @@ public class LexicalAnalysis {
             }
 
             // Construcción de identificadores y números
-            if (Character.isLetterOrDigit(currentChar) || currentChar == '_' || currentChar == '*') {
+            if (Character.isLetterOrDigit(currentChar) || currentChar == '_') {
                 currentToken.append(currentChar);
                 i++;
             } else {
@@ -101,9 +116,7 @@ public class LexicalAnalysis {
     }
 
     private void addToken(ArrayList<String> tokens, String token) {
-        if (token.contains("*")) {
-            errors.add("Error léxico: uso inválido de '*' en identificador '" + token + "' en línea " + currentLine);
-        } else {
+        if (!token.trim().isEmpty()) {  // Solo agregar tokens no vacíos
             tokens.add(token);
         }
     }
