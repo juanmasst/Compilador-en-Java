@@ -1,4 +1,3 @@
-// LexicalAnalysis.java
 package compiler;
 
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class LexicalAnalysis {
             if (currentChar == '\n') {
                 currentLine++;
                 i++;
-                if (!currentToken.isEmpty()) {
+                if (currentToken.length() > 0) {
                     addToken(tokens, currentToken.toString());
                     currentToken.setLength(0);
                 }
@@ -36,7 +35,7 @@ public class LexicalAnalysis {
 
             // Ignorar espacios en blanco
             if (Character.isWhitespace(currentChar)) {
-                if (!currentToken.isEmpty()) {
+                if (currentToken.length() > 0) {
                     addToken(tokens, currentToken.toString());
                     currentToken.setLength(0);
                 }
@@ -57,7 +56,7 @@ public class LexicalAnalysis {
 
             // Manejo de operadores compuestos
             if (isOperatorChar(currentChar)) {
-                if (!currentToken.isEmpty()) {
+                if (currentToken.length() > 0) {
                     addToken(tokens, currentToken.toString());
                     currentToken.setLength(0);
                 }
@@ -74,7 +73,7 @@ public class LexicalAnalysis {
 
             // Manejo de separadores
             if (isSeparator(currentChar)) {
-                if (!currentToken.isEmpty()) {
+                if (currentToken.length() > 0) {
                     addToken(tokens, currentToken.toString());
                     currentToken.setLength(0);
                 }
@@ -94,7 +93,7 @@ public class LexicalAnalysis {
         }
 
         // Agregar el último token si existe
-        if (!currentToken.isEmpty()) {
+        if (currentToken.length() > 0) {
             addToken(tokens, currentToken.toString());
         }
 

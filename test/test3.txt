@@ -1,6 +1,66 @@
-long _variable1 = 10;
-double *suma = *variable1 + 20;
-// Esto es un comentario de una línea
-if (_suma > 30) then {
+/* Este es un comentario multilínea
+   que prueba varias líneas
+   de comentarios */
+
+// Declaración de variables con diferentes tipos DOUBLE TIENE QUE ADMITIR PUNTO FLOTANTE
+long _contador = 10;
+double _precio = 9999;
+
+// Prueba de operadores aritméticos
+long _suma = _contador + 5;
+double _multiplicacion = _precio * 2;
+long _resta = _contador - 3;
+double _division = _precio / 2;
+
+/* Prueba de operadores
+   relacionales y lógicos */
+if (_suma > _resta) then {
     write(_suma);
+} else {
+    write(_resta);
 }
+
+// Prueba del while y break
+long _iterador = 0;
+while (_iterador <= 5) {
+    _iterador = _iterador + 1;
+    if (_iterador == 3) then {
+        write(_iterador);
+        break;
+    }
+}
+
+// Prueba de diferentes comparadores
+if (_precio >= 100) then {
+    write(_precio);
+}
+
+if (_precio < 200) then {
+    write(_precio);
+}
+
+if (_precio <= 9999) then {
+    write(_precio);
+}
+
+// Prueba de igualdad y diferencia
+if (_precio == 9999) then {
+    write(_precio);
+}
+
+if (_precio != 100) then {
+    write(_precio);
+}
+
+if (_precio <> 100) then {
+    write(_precio);
+}
+
+// Prueba de read
+read(_precio);
+
+/* Prueba de identificadores más complejos
+   con combinaciones de letras y números */
+long _variable123 = 0;
+double _precio_total = 0;
+long _contador_general = 0;
