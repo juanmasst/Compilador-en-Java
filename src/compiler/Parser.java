@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package compiler;
 
 import java.util.ArrayList;
@@ -15,67 +10,109 @@ public class Parser {
     private ArrayList<String> errors = new ArrayList<>();
     private ArrayList<String> declaredVariables = new ArrayList<>();
 
-    public Parser(ArrayList<String> var1) {
-        this.tokens = var1;
-        if (!var1.isEmpty()) {
-            this.currentToken = (String)var1.get(0);
+    // Banderas de debug
+    private boolean DEBUG = true;
+    private void debug(String method, String message) {
+        if (DEBUG) {
+            System.out.println("[DEBUG] " + method + ": " + message + 
+                             " | Token actual: " + this.currentToken + 
+                             " | Línea: " + this.currentLine +
+                             " | Pos: " + this.currentPosition);
         }
+    }
 
+    public Parser(ArrayList<String> tokens) {
+        this.tokens = new ArrayList<>();
+        for (String token : tokens) {
+            if (!token.trim().isEmpty()) {
+                this.tokens.add(token);
+            }
+        }
+        this.currentPosition = 0;
+        this.currentToken = this.tokens.get(0);
     }
 
     public ArrayList<String> parse() {
-        while(this.currentPosition < this.tokens.size()) {
-            if (this.currentToken.equals("\n")) {
-                ++this.currentLine;
-                this.advance();
-            } else if (this.isDataType(this.currentToken)) {
-                this.parseDeclaration();
-            } else if (this.currentToken.equals("if")) {
-                this.parseIfStatement();
-            } else if (this.isIdentifier(this.currentToken)) {
-                if (!this.isDeclaredVariable(this.currentToken)) {
-                    this.addError("Variable no declarada: " + this.currentToken);
+        debug("parse", "Iniciando análisis sintáctico");
+        while (this.currentPosition < this.tokens.size()) {
+            try {
+                debug("parse", "Procesando siguiente token");
+                
+                // Primero procesamos los tipos de datos
+                if (this.isDataType(this.currentToken)) {
+                    debug("parse", "Procesando declaración");
+                    this.parseDeclaration();
+                } 
+                // Luego las estructuras de control
+                else if (this.currentToken.equals("if")) {
+                    debug("parse", "Procesando if");
+                    this.parseIfStatement();
+                } else if (this.currentToken.equals("while")) {
+                    debug("parse", "Procesando while");
+                    this.parseWhileStatement();
+                } else if (this.currentToken.equals("read")) {
+                    debug("parse", "Procesando read");
+                    this.parseReadStatement();
+                } else if (this.currentToken.equals("write")) {
+                    debug("parse", "Procesando write");
+                    this.parseWriteStatement();
                 }
-
-                this.parseAssignment();
-            } else {
+                // Finalmente las asignaciones
+                else if (this.isIdentifier(this.currentToken)) {
+                    debug("parse", "Procesando asignación");
+                    if (!this.isDeclaredVariable(this.currentToken)) {
+                        this.addError("Variable no declarada: " + this.currentToken);
+                    }
+                    this.parseAssignment();
+                } else {
+                    this.advance();
+                }
+            } catch (Exception e) {
+                debug("parse", "Error inesperado: " + e.getMessage());
+                this.addError("Error inesperado procesando token: " + this.currentToken);
                 this.advance();
             }
         }
-
-        return this.errors.isEmpty() ? new ArrayList<String>() {
-            {
-                this.add("success");
-            }
-        } : this.errors;
+        debug("parse", "Análisis sintáctico finalizado");
+        return this.errors;
     }
 
     private void parseDeclaration() {
         String dataType = this.currentToken;
         this.advance();
+        
         if (!this.isIdentifier(this.currentToken)) {
             this.addError("Se esperaba un identificador que comience con '_'");
-        } else {
-            String identifier = this.currentToken;
-            if (this.isDeclaredVariable(identifier)) {
-                this.addError("Variable ya declarada: " + identifier);
-            } else {
-                this.declaredVariables.add(identifier);
-                this.advance();
-                if (this.currentToken.equals("=")) {
-                    this.advance();
-                    if (dataType.equals("long") && this.currentToken.contains(".")) {
-                        this.addError("No se puede asignar un decimal a una variable long");
-                    }
-                    this.parseExpression();
-                }
-
-                if (!this.currentToken.equals(";")) {
-                    this.addError("Se esperaba ';' al final de la declaración");
-                } else {
-                    this.advance();
-                }
+            return;
+        }
+        
+        String identifier = this.currentToken;
+        if (this.isDeclaredVariable(identifier)) {
+            this.addError("Variable ya declarada: " + identifier);
+            return;
+        }
+        
+        this.declaredVariables.add(identifier);
+        this.advance();
+        
+        if (this.currentPosition >= this.tokens.size()) {
+            this.addError("Fin inesperado en la declaración");
+            return;
+        }
+        
+        if (this.currentToken.equals("=")) {
+            this.advance();
+            if (dataType.equals("long") && this.currentToken.contains(".")) {
+                this.addError("No se puede asignar un decimal a una variable long");
+                return;
             }
+            this.parseExpression();
+        }
+        
+        if (this.currentPosition >= this.tokens.size() || !this.currentToken.equals(";")) {
+            this.addError("Se esperaba ';' al final de la declaración");
+        } else {
+            this.advance();
         }
     }
 
@@ -103,7 +140,7 @@ public class Parser {
         this.advance();
         this.parseBlock();
         
-        if (this.currentToken.equals("else")) {
+        if (this.currentPosition < this.tokens.size() && this.currentToken.equals("else")) {
             this.advance();
             this.parseBlock();
         }
@@ -130,10 +167,7 @@ public class Parser {
                     this.addError("Variable no declarada: " + this.currentToken);
                 }
                 this.parseAssignment();
-            } else if (!this.currentToken.equals("\n")) {
-                this.addError("Sentencia inválida dentro del bloque");
-                this.advance();
-            } else {
+            } else if (!this.currentToken.equals("\n") && !this.currentToken.equals(" ")) {
                 this.advance();
             }
         }
@@ -149,38 +183,47 @@ public class Parser {
         this.advance();
         if (!this.currentToken.equals("(")) {
             this.addError("Se esperaba '(' después de write");
-        } else {
-            this.advance();
-            if (!this.isIdentifier(this.currentToken) && !this.isNumber(this.currentToken)) {
-                this.addError("Se esperaba un identificador o número en la sentencia write");
-            } else {
-                if (this.isIdentifier(this.currentToken) && !this.isDeclaredVariable(this.currentToken)) {
-                    this.addError("Variable no declarada: " + this.currentToken);
-                }
-
-                this.advance();
-                if (!this.currentToken.equals(")")) {
-                    this.addError("Se esperaba ')' después del argumento de write");
-                } else {
-                    this.advance();
-                    if (!this.currentToken.equals(";")) {
-                        this.addError("Se esperaba ';' después de la sentencia write");
-                    } else {
-                        this.advance();
-                    }
-                }
-            }
+            return;
         }
+        
+        this.advance();
+        if (!this.isIdentifier(this.currentToken) && !this.isNumber(this.currentToken)) {
+            this.addError("Se esperaba un identificador o número en la sentencia write");
+            return;
+        }
+        
+        if (this.isIdentifier(this.currentToken) && !this.isDeclaredVariable(this.currentToken)) {
+            this.addError("Variable no declarada: " + this.currentToken);
+            return;
+        }
+
+        this.advance();
+        if (!this.currentToken.equals(")")) {
+            this.addError("Se esperaba ')' después del argumento de write");
+            return;
+        }
+        
+        this.advance();
+        if (!this.currentToken.equals(";")) {
+            this.addError("Se esperaba ';' después de la sentencia write");
+            return;
+        }
+        
+        this.advance();
     }
 
     private void parseExpression() {
         this.parseTerm();
-
-        while(this.isArithmeticOperator(this.currentToken) || this.isRelationalOperator(this.currentToken)) {
+        while (this.currentPosition < this.tokens.size() && 
+               (this.isArithmeticOperator(this.currentToken) || 
+                this.isRelationalOperator(this.currentToken))) {
             this.advance();
+            if (this.currentPosition >= this.tokens.size()) {
+                this.addError("Expresión incompleta");
+                return;
+            }
             this.parseTerm();
         }
-
     }
 
     private void parseTerm() {
@@ -188,14 +231,13 @@ public class Parser {
             if (!this.isDeclaredVariable(this.currentToken)) {
                 this.addError("Variable no declarada: " + this.currentToken);
             }
-
             this.advance();
         } else if (this.isNumber(this.currentToken)) {
             this.advance();
         } else if (this.currentToken.equals("(")) {
             this.advance();
             this.parseExpression();
-            if (!this.currentToken.equals(")")) {
+            if (this.currentPosition >= this.tokens.size() || !this.currentToken.equals(")")) {
                 this.addError("Falta paréntesis de cierre");
             } else {
                 this.advance();
@@ -203,70 +245,43 @@ public class Parser {
         } else {
             this.addError("Se esperaba un identificador o número");
         }
-
-    }
-
-    private boolean isDataType(String var1) {
-        return var1.equals("long") || var1.equals("double");
-    }
-
-    private boolean isIdentifier(String var1) {
-        return var1 != null && var1.startsWith("_") && var1.length() > 1 && var1.substring(1).matches("[a-zA-Z0-9_]+");
-    }
-
-    private boolean isDeclaredVariable(String var1) {
-        return this.declaredVariables.contains(var1);
-    }
-
-    private boolean isArithmeticOperator(String var1) {
-        return var1.equals("+") || var1.equals("-") || var1.equals("*") || var1.equals("/");
-    }
-
-    private boolean isRelationalOperator(String var1) {
-        return var1.equals(">") || var1.equals("<") || var1.equals(">=") || 
-               var1.equals("<=") || var1.equals("==") || var1.equals("!=") || 
-               var1.equals("<>");
-    }
-
-    private boolean isNumber(String var1) {
-        try {
-            if (currentToken.contains(".")) {
-                Double.parseDouble(var1);
-            } else {
-                Long.parseLong(var1);
-            }
-            return true;
-        } catch (NumberFormatException var3) {
-            return false;
-        }
     }
 
     private void parseAssignment() {
-        String var1 = this.currentToken;
+        debug("parseAssignment", "Iniciando");
+        String identifier = this.currentToken;
         this.advance();
+        
+        if (this.currentPosition >= this.tokens.size()) {
+            debug("parseAssignment", "Fin inesperado después de identificador");
+            this.addError("Se esperaba '=' después del identificador " + identifier);
+            return;
+        }
+        
+        if (this.isArithmeticOperator(this.currentToken) || 
+            this.isRelationalOperator(this.currentToken) ||
+            this.currentToken.equals(")") ||
+            this.currentToken.equals(";")) {
+            return;
+        }
+        
         if (!this.currentToken.equals("=")) {
-            this.addError("Se esperaba '=' en la asignación");
+            debug("parseAssignment", "Token inesperado, se esperaba '='");
+            this.addError("Se esperaba '=' después del identificador " + identifier);
+            return;
+        }
+        
+        debug("parseAssignment", "Procesando expresión después de =");
+        this.advance();
+        this.parseExpression();
+        
+        if (this.currentPosition >= this.tokens.size() || !this.currentToken.equals(";")) {
+            debug("parseAssignment", "Falta punto y coma al final");
+            this.addError("Se esperaba ';' al final de la asignación");
         } else {
             this.advance();
-            this.parseExpression();
-            if (!this.currentToken.equals(";")) {
-                this.addError("Se esperaba ';' al final de la asignación");
-            } else {
-                this.advance();
-            }
         }
-    }
-
-    private void advance() {
-        ++this.currentPosition;
-        if (this.currentPosition < this.tokens.size()) {
-            this.currentToken = (String)this.tokens.get(this.currentPosition);
-        }
-
-    }
-
-    private void addError(String var1) {
-        this.errors.add("Error: " + var1 + " en línea " + this.currentLine);
+        debug("parseAssignment", "Finalizado");
     }
 
     private void parseWhileStatement() {
@@ -312,6 +327,7 @@ public class Parser {
         
         if (!this.isDeclaredVariable(this.currentToken)) {
             this.addError("Variable no declarada: " + this.currentToken);
+            return;
         }
         
         this.advance();
@@ -326,5 +342,58 @@ public class Parser {
             return;
         }
         this.advance();
+    }
+
+    private boolean isDataType(String token) {
+        return token.equals("long") || token.equals("double");
+    }
+
+    private boolean isIdentifier(String token) {
+        return token != null && token.startsWith("_") && token.length() > 1 && 
+               token.substring(1).matches("[a-zA-Z0-9_]+");
+    }
+
+    private boolean isDeclaredVariable(String token) {
+        return this.declaredVariables.contains(token);
+    }
+
+    private boolean isArithmeticOperator(String token) {
+        return token.equals("+") || token.equals("-") || token.equals("*") || token.equals("/");
+    }
+
+    private boolean isRelationalOperator(String token) {
+        return token.equals(">") || token.equals("<") || token.equals(">=") || 
+               token.equals("<=") || token.equals("==") || token.equals("!=") || 
+               token.equals("<>");
+    }
+
+    private boolean isNumber(String token) {
+        try {
+            if (token.contains(".")) {
+                Double.parseDouble(token);
+            } else {
+                Long.parseLong(token);
+            }
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private void advance() {
+        ++this.currentPosition;
+        if (this.currentPosition < this.tokens.size()) {
+            this.currentToken = this.tokens.get(this.currentPosition);
+            if (this.currentToken.equals("\n")) {
+                ++this.currentLine;
+            }
+        }
+    }
+
+    private void addError(String message) {
+        String errorMsg = "Error: " + message + " en línea " + currentLine;
+        if (!errors.contains(errorMsg)) {  // Prevención de errores duplicados
+            errors.add(errorMsg);
+        }
     }
 }

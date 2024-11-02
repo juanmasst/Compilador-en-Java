@@ -45,24 +45,13 @@ public class LexicalAnalysis {
                         continue;
                     } else if (text.charAt(i + 1) == '*') {
                         // Comentario multilínea
-                        tokens.add("/*");
                         i += 2;
                         while (i < text.length() - 1 && !(text.charAt(i) == '*' && text.charAt(i + 1) == '/')) {
                             if (text.charAt(i) == '\n') {
                                 currentLine++;
-                            } else if (!Character.isWhitespace(text.charAt(i))) {
-                                currentToken.append(text.charAt(i));
-                            } else if (currentToken.length() > 0) {
-                                tokens.add(currentToken.toString());
-                                currentToken.setLength(0);
                             }
                             i++;
                         }
-                        if (currentToken.length() > 0) {
-                            tokens.add(currentToken.toString());
-                            currentToken.setLength(0);
-                        }
-                        tokens.add("*/");
                         i += 2;
                         continue;
                     }

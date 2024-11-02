@@ -70,7 +70,7 @@ public class Compiler {
             System.out.println("----------------------------------------");
             for (int i = 1; i < tokens.size(); i++) {  // Comienza desde 1 para saltar "success"
                 if (!tokens.get(i).trim().isEmpty()) {
-                    System.out.printf("Token %3d: %s\n", i-1, tokens.get(i));
+                    System.out.printf("Token %3d: %s\n", i, tokens.get(i));
                 }
             }
             System.out.println(tokens.get(0));  // Muestra "success" al final
@@ -78,7 +78,8 @@ public class Compiler {
             // Análisis sintáctico
             System.out.println("\nParsing Results:");
             System.out.println("----------------------------------------");
-            Parser parser = new Parser(tokens);
+            ArrayList<String> tokensForParser = new ArrayList<>(tokens.subList(1, tokens.size()));
+            Parser parser = new Parser(tokensForParser);
             ArrayList<String> results = parser.parse();
 
             for (String result : results) {

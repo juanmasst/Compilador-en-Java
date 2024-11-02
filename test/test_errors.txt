@@ -1,0 +1,44 @@
+/* Prueba de errores comunes */
+
+// Error 1: Variable no declarada
+_undeclared = 100;
+
+// Error 2: Identificador inválido (sin guion bajo)
+long variable123 = 0;
+
+// Error 3: Asignación de decimal a long
+long _numero = 10.5;
+
+// Error 4: Variable ya declarada
+double _precio = 99.99;
+double _precio = 50.0;
+
+// Error 5: Falta punto y coma
+long _contador = 1
+
+// Error 6: Falta paréntesis en if
+if _contador > 0) then {
+    write(_contador);
+}
+
+// Error 7: Falta then en if
+if (_contador < 10) {
+    write(_contador);
+}
+
+// Error 8: Break fuera de while
+break;
+
+// Error 9: Variable no declarada en write
+write(_noexiste);
+
+// Error 10: Falta paréntesis en read
+read _valor);
+
+// Error 11: Expresión incompleta
+_precio = _contador +;
+
+// Error 12: Falta llave de cierre
+while (_precio > 0) {
+    _precio = _precio - 1;
+} 

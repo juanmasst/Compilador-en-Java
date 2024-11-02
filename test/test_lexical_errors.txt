@@ -1,0 +1,35 @@
+/* Prueba de errores léxicos */
+
+// Error 1: Uso de coma en números decimales
+double _precio = 99.99;
+
+// Error 2: Caracteres no permitidos
+long _valor# = 100;
+double @precio = 50.0;
+
+// Error 3: Identificador sin guion bajo
+variable = 42;
+
+// Error 4: Operadores inválidos
+if (x $ y) then {
+    write(x);
+}
+
+// Error 5: Símbolos no permitidos
+long _contador¿ = 1;
+
+// Error 6: Caracteres especiales en expresiones
+_valor = 100 € + 200;
+
+// Error 7: Uso de tabuladores y caracteres de control
+	long _tab = 1;
+
+// Error 8: Símbolos de puntuación incorrectos
+write(_valor):
+
+// Error 9: Operadores incompletos o mal formados
+if (_valor =! 100) then {
+    write(_valor);
+}
+
+// Error 10: Caract 
