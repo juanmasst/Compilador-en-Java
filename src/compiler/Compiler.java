@@ -45,45 +45,36 @@ public class Compiler {
         System.out.println("========================================");
 
         try {
-            // Leer y mostrar el contenido del archivo
             String fileContent = Readfiles.readFileContent(file);
             System.out.println("\nFile content:");
             System.out.println("----------------------------------------");
             System.out.println(fileContent);
             System.out.println("----------------------------------------");
 
-            // Análisis léxico directo
             LexicalAnalysis lexer = new LexicalAnalysis(fileContent);
             ArrayList<String> tokens = lexer.scan();
 
-            // Si hay errores léxicos, mostrarlos y terminar
             if (!tokens.isEmpty() && tokens.get(0).startsWith("Error:")) {
                 System.out.println("\nErrores léxicos encontrados:");
                 System.out.println("----------------------------------------");
                 System.out.println(tokens.get(0));
-                System.out.println("No se realizará el análisis sintáctico hasta que se corrijan los errores léxicos.");
                 return;
             }
 
-            // Mostrar tokens y luego success
-            System.out.println("\nLexical Analysis Results:");
-            System.out.println("----------------------------------------");
-            for (int i = 1; i < tokens.size(); i++) {  // Comienza desde 1 para saltar "success"
-                if (!tokens.get(i).trim().isEmpty()) {
-                    System.out.printf("Token %3d: %s\n", i, tokens.get(i));
-                }
-            }
-            System.out.println(tokens.get(0));  // Muestra "success" al final
+            System.out.println("\nAnálisis léxico completado exitosamente.");
 
-            // Análisis sintáctico
-            System.out.println("\nParsing Results:");
+            System.out.println("\nResultados del análisis sintáctico:");
             System.out.println("----------------------------------------");
             ArrayList<String> tokensForParser = new ArrayList<>(tokens.subList(1, tokens.size()));
             Parser parser = new Parser(tokensForParser);
             ArrayList<String> results = parser.parse();
 
-            for (String result : results) {
-                System.out.println(result);
+            if (results.isEmpty()) {
+                System.out.println("Análisis sintáctico completado exitosamente.");
+            } else {
+                for (String result : results) {
+                    System.out.println(result);
+                }
             }
 
         } catch (IOException e) {

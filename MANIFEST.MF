@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: compiler.Compiler
+Class-Path: .
+file.encoding: UTF-8 

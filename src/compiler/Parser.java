@@ -11,7 +11,7 @@ public class Parser {
     private ArrayList<String> declaredVariables = new ArrayList<>();
 
     // Banderas de debug
-    private boolean DEBUG = true;
+    private boolean DEBUG = false;
     private void debug(String method, String message) {
         if (DEBUG) {
             System.out.println("[DEBUG] " + method + ": " + message + 
